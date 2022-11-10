@@ -1,7 +1,9 @@
 """
 """
+import pytest
+import logging
     
-
+@pytest.mark.asyncio
 async def test_simple_dispute(client) -> None:
     simple_dispute = {
         "claim_1": {
