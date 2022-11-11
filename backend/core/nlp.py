@@ -1,11 +1,7 @@
 """
 """
-from random import randint
-import logging
-from typing import Dict
-
 import openai
-
+from core.types import OpenAIResponse
 from core.types import Claim, ArbitrationResult
 
 
@@ -22,7 +18,7 @@ async def query_openai_for_arbitration(claim_1: Claim, claim_2: Claim) -> Arbitr
 
     :return: `ArbitrationResult`
     """
-    response = openai.Completion.create(
+    response: OpenAIResponse = openai.Completion.create(
         model="text-davinci-002",
         prompt=_BASE_PROMPT.format(
             name_1=claim_1["person"],

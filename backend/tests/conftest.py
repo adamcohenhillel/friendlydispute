@@ -1,15 +1,15 @@
 """Fixtures for pytests
 """
-from typing import Any, AsyncGenerator
+from typing import AsyncGenerator
 
-import pytest
+import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 
 from api.app import get_app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 def fastapi_app() -> FastAPI:
     """Fixture for creating FastAPI app.
 
@@ -19,7 +19,7 @@ def fastapi_app() -> FastAPI:
     return app
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client(fastapi_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
     """Fixture that creates client for requesting server.
 
