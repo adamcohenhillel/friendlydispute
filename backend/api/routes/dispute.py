@@ -1,7 +1,8 @@
 """
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from aioredis import Redis
 
 from core.nlp import query_openai_for_arbitration
 from core.types import Claim
@@ -18,11 +19,12 @@ class DisputeSchema(BaseModel):
 @dispute_router.post('/{room_uuid}')
 async def post(
     body: DisputeSchema,
-    redis: get_redis_connection()
+    redis: Redis = Depends(get_redis_connection)
 ):
     """New arbitration
 
     :param body: request json parameters
     """
-    # request.app.state.redis
+    redis.set('yello', 'bello')
+    redis.get('yello')
     return await query_openai_for_arbitration(claim_1=body.claim_1, claim_2=body.claim_2)
