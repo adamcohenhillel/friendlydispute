@@ -1,4 +1,4 @@
-"""Deeper 2022, All Rights Reserved
+"""
 """
 from pydantic import BaseSettings
 

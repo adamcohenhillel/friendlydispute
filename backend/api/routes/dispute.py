@@ -25,6 +25,6 @@ async def post(
 
     :param body: request json parameters
     """
-    redis.set('yello', 'bello')
-    redis.get('yello')
+    await redis.set('yello', 'bello')
+    await redis.get('yello')
     return await query_openai_for_arbitration(claim_1=body.claim_1, claim_2=body.claim_2)
