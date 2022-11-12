@@ -1,13 +1,11 @@
-"""Deeper 2022, All Rights Reserved
 """
-from typing import AsyncGenerator
-
-from starlette.requests import Request
+"""
+from fastapi import Request
 from aioredis import Redis
 
 
 
-async def get_redis_connection(request: Request) -> AsyncGenerator[Redis, None]:
+async def get_redis_connection(request: Request) -> Redis:
     """Get redis client.
 
     This dependency aquires connection from pool.
