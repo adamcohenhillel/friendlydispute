@@ -11,8 +11,10 @@ passlib[bcrypt]==1.7.4
 openai==0.18.0
 
 # DBs:
-sqlalchemy[asyncio]==1.4.39
-asyncpg==0.26.0
+# sqlalchemy[asyncio]==1.4.39
+# asyncpg==0.26.0
+redis==4.3.4
+aioredis==2.0.1
 
 # CI/CD;
 pytest==7.1.2

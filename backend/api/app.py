@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from fastapi.routing import APIRouter
 
+from api.exception_handlers import register_exception_handlers
+from api.lifetime import register_shutdown_event, register_startup_event
 from api.routes.dispute import dispute_router
 
 
@@ -18,6 +20,11 @@ def get_app() -> FastAPI:
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
     )
+    
+    # Adds startup and shutdown events.
+    register_startup_event(app)
+    register_shutdown_event(app)
+    register_exception_handlers(app)
 
     api_router = APIRouter()
     api_router.include_router(dispute_router, prefix='/dispute', tags=['users'])
