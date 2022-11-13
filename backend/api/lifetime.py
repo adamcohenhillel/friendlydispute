@@ -20,10 +20,7 @@ def register_startup_event(app: FastAPI) -> Callable[[], Awaitable[None]]:
 
     @app.on_event('startup')
     async def _startup() -> None:
-        print('**************** 111 WHAT')
         app.state.redis = aioredis.from_url(settings.redis_url, decode_responses=True)
-        print('**************** is going on')
-        print(f'**************** {app.state.redis}')
 
     return _startup
 

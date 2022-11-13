@@ -2,11 +2,14 @@
 """
 from typing import AsyncGenerator
 
+import aioredis
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
 
 from api.app import get_app
+from api.dependencies import get_redis_connection
+from settings import settings
 
 
 @pytest_asyncio.fixture
@@ -16,6 +19,7 @@ def fastapi_app() -> FastAPI:
     :return: fastapi app with mocked dependencies.
     """
     app = get_app()
+    app.dependency_overrides[get_redis_connection] = lambda: aioredis.from_url(settings.redis_url, decode_responses=True) 
     return app
 
 
