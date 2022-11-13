@@ -1,6 +1,6 @@
 """
 """
-from fastapi import Request
+from starlette.requests import Request
 from aioredis import Redis
 
 
