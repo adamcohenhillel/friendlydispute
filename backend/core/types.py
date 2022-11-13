@@ -10,6 +10,7 @@ class OpenAIUsage(TypedDict):
     prompt_tokens: int
     total_tokens: int
 
+
 class OpenAIChoice(TypedDict):
     """OpenAI Choice
     """
@@ -17,6 +18,7 @@ class OpenAIChoice(TypedDict):
     index: int
     logprobs: Union[None, str]
     text: str
+
 
 class OpenAIResponse(TypedDict):
     """OpenAI response type
@@ -27,6 +29,7 @@ class OpenAIResponse(TypedDict):
     model: str
     object: str
     usage: OpenAIUsage
+
 
 class Claim(TypedDict):
     person: str
