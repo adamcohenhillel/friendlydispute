@@ -14,4 +14,7 @@ async def get_redis_connection(request: Request) -> Redis:
 
     :yield: redis client.
     """
+    print('@@@@@@@@@@@@@@@@@@@@@@@@')
+    print(request.app.state)
+    print('@@@@@@@@@@@@@@@@@@@@@@@@')
     return request.app.state.redis
