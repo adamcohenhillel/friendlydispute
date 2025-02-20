@@ -133,3 +133,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+*.env.local*
+node_modules/
+*node_modules*
+*cache*
