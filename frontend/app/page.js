@@ -1,7 +1,5 @@
+import ClientPage from './components/ClientPage';
+
 export default function Home() {
-  return (
-    <main>
-      <div>Hello world!</div>
-    </main>
-  );
+  return <ClientPage />;
 }

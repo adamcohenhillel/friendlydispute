@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@openzeppelin/contracts':
+        specifier: ^4.9.3
+        version: 4.9.3
     devDependencies:
       '@nomicfoundation/hardhat-chai-matchers':
         specifier: ^2.0.0
@@ -38,6 +42,9 @@ importers:
       chai:
         specifier: ^4.2.0
         version: 4.5.0
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       ethers:
         specifier: ^6.4.0
         version: 6.13.5
@@ -375,6 +382,9 @@ packages:
   '@nomicfoundation/solidity-analyzer@0.1.2':
     resolution: {integrity: sha512-q4n32/FNKIhQ3zQGGw5CvPF6GTvDCpYwIf7bEY/dZTZbgfDsHyjJwURxUJf3VQuuJj+fDIFl4+KkBVbw4Ef6jA==}
     engines: {node: '>= 12'}
+
+  '@openzeppelin/contracts@4.9.3':
+    resolution: {integrity: sha512-He3LieZ1pP2TNt5JbkPA4PNT9WC3gOTOlDcFGJW4Le4QKqwmiNJCRt44APfxMxvq7OugU/cqYuPcSBzOw38DAg==}
 
   '@scure/base@1.1.9':
     resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
@@ -880,6 +890,10 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
+  dotenv@16.4.7:
+    resolution: {integrity: sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ==}
+    engines: {node: '>=12'}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -1270,6 +1284,10 @@ packages:
   is-binary-path@2.1.0:
     resolution: {integrity: sha512-ZMERYes6pDydyuGidse7OsHxtbI7WVeUEozgR/g7rd0xUimYNlvZRE/K2MgZTjWy725IfelLeVcEM97mmtRGXw==}
     engines: {node: '>=8'}
+
+  is-core-module@2.16.1:
+    resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
+    engines: {node: '>= 0.4'}
 
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
@@ -1665,6 +1683,11 @@ packages:
   resolve@1.17.0:
     resolution: {integrity: sha512-ic+7JYiV8Vi2yzQGFWOkiZD5Z9z7O2Zhm9XMaTxdJExKasieFCr+yXZ/WmXsckHiKl12ar0y6XiXDx3m4RHn1w==}
 
+  resolve@1.22.10:
+    resolution: {integrity: sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==}
+    engines: {node: '>= 0.4'}
+    hasBin: true
+
   reusify@1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
@@ -1844,6 +1867,10 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
+
+  supports-preserve-symlinks-flag@1.0.0:
+    resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
+    engines: {node: '>= 0.4'}
 
   sync-request@6.1.0:
     resolution: {integrity: sha512-8fjNkrNlNCrVc/av+Jn+xxqfCjYaBoHqCsDz6mt030UMxJGr+GSfCV1dQt2gRtlL63+VPidwDVLr7V2OcTSdRw==}
@@ -2602,6 +2629,8 @@ snapshots:
       '@nomicfoundation/solidity-analyzer-linux-x64-musl': 0.1.2
       '@nomicfoundation/solidity-analyzer-win32-x64-msvc': 0.1.2
 
+  '@openzeppelin/contracts@4.9.3': {}
+
   '@scure/base@1.1.9': {}
 
   '@scure/bip32@1.1.5':
@@ -2723,13 +2752,13 @@ snapshots:
 
   '@types/concat-stream@1.6.1':
     dependencies:
-      '@types/node': 22.13.4
+      '@types/node': 8.10.66
 
   '@types/deep-eql@4.0.2': {}
 
   '@types/form-data@0.0.33':
     dependencies:
-      '@types/node': 22.13.4
+      '@types/node': 8.10.66
 
   '@types/glob@7.2.0':
     dependencies:
@@ -3134,6 +3163,8 @@ snapshots:
   dir-glob@3.0.1:
     dependencies:
       path-type: 4.0.0
+
+  dotenv@16.4.7: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -3705,6 +3736,10 @@ snapshots:
     dependencies:
       binary-extensions: 2.3.0
 
+  is-core-module@2.16.1:
+    dependencies:
+      hasown: 2.0.2
+
   is-extglob@2.1.1: {}
 
   is-fullwidth-code-point@2.0.0: {}
@@ -4030,7 +4065,7 @@ snapshots:
 
   rechoir@0.6.2:
     dependencies:
-      resolve: 1.17.0
+      resolve: 1.22.10
 
   recursive-readdir@2.2.3:
     dependencies:
@@ -4057,6 +4092,12 @@ snapshots:
   resolve@1.17.0:
     dependencies:
       path-parse: 1.0.7
+
+  resolve@1.22.10:
+    dependencies:
+      is-core-module: 2.16.1
+      path-parse: 1.0.7
+      supports-preserve-symlinks-flag: 1.0.0
 
   reusify@1.0.4: {}
 
@@ -4281,6 +4322,8 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+
+  supports-preserve-symlinks-flag@1.0.0: {}
 
   sync-request@6.1.0:
     dependencies:
