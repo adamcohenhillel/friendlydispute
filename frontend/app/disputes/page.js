@@ -92,38 +92,10 @@ export default function DisputesPage() {
     }
 
     try {
-      // Get both cases
-      const dispute = disputes.find(d => d.id === disputeId);
-      if (!dispute) {
-        setError('Dispute not found');
-        return;
-      }
-
-      // Call OpenAI to analyze the cases and determine the winner
-      const response = await fetch('/api/resolve-dispute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          disputeId,
-          caseA: dispute.caseDataA,
-          caseB: dispute.caseDataB,
-          partyA: dispute.partyA,
-          partyB: dispute.partyB,
-        }),
-      });
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to resolve dispute');
-      }
-
-      // Execute the contract call with the AI's decision
       const data = encodeFunctionData({
         abi: DisputeEscrowABI,
-        functionName: 'resolveDispute',
-        args: [BigInt(disputeId), result.winner],
+        functionName: 'requestResolution',
+        args: [BigInt(disputeId)],
       });
 
       const tx = await sendTransaction({
@@ -131,12 +103,12 @@ export default function DisputesPage() {
         data,
       });
 
-      console.log('Resolve transaction sent:', tx);
+      console.log('Resolution request sent:', tx);
       await tx.wait();
       fetchDisputes(); // Refresh the disputes list
     } catch (error) {
-      console.error('Error resolving dispute:', error);
-      setError(error.message || 'Failed to resolve dispute');
+      console.error('Error requesting resolution:', error);
+      setError(error.message || 'Failed to request resolution');
     }
   };
 
@@ -185,7 +157,8 @@ export default function DisputesPage() {
         isResolved: dispute[5],
         winner: dispute[6],
         createdAt: Number(dispute[7]),
-        resolvedAt: Number(dispute[8])
+        resolvedAt: Number(dispute[8]),
+        requestId: dispute[9],
       }));
 
       console.log('Formatted disputes:', formattedDisputes);
@@ -360,13 +333,18 @@ export default function DisputesPage() {
                                             Submit Case
                                           </button>
                                         ) : null}
-                                        {bothCasesSubmitted && isPartyA && (
+                                        {bothCasesSubmitted && isPartyA && !dispute.requestId && (
                                           <button
                                             className="text-green-600 hover:text-green-900"
                                             onClick={() => handleResolveDispute(dispute.id)}
                                           >
-                                            Resolve with AI
+                                            Request Resolution
                                           </button>
+                                        )}
+                                        {dispute.requestId && !dispute.isResolved && (
+                                          <span className="text-yellow-600">
+                                            Resolution in progress...
+                                          </span>
                                         )}
                                       </>
                                     )}

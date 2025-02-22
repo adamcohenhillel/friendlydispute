@@ -1,0 +1,13 @@
+{
+  "name": "dispute-resolution-adapter",
+  "version": "1.0.0",
+  "description": "Chainlink External Adapter for AI-based dispute resolution",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@chainlink/external-adapter": "^0.2.6",
+    "openai": "^4.0.0"
+  }
+} 

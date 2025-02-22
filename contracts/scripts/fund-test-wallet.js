@@ -4,8 +4,8 @@ async function main() {
   const [signer] = await hre.ethers.getSigners();
   
   // The wallet address to fund - replace this with your wallet address
-//   const walletToFund = "0xa1C50763c2C0492E35AAbAA459160E4694018d8d";
-  const walletToFund = "0x09D3A8C1250D12E00591660FcD237bc69b7ea1CB";
+  const walletToFund = "0xa1C50763c2C0492E35AAbAA459160E4694018d8d";
+  // const walletToFund = "0x09D3A8C1250D12E00591660FcD237bc69b7ea1CB";
 
   console.log(`Funding ${walletToFund} with 10 ETH from ${signer.address}...`);
   
