@@ -44,12 +44,8 @@ const config = createConfig({
 
 const queryClient = new QueryClient();
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
 function Header() {
-  const { authenticated, user, logout } = usePrivy();
+  const { authenticated, user, logout, login } = usePrivy();
   const searchParams = useSearchParams();
   const currentPage = searchParams.get('page');
 
@@ -59,55 +55,91 @@ function Header() {
   ];
 
   return (
-    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="mr-4 flex">
-          <Link href="/" className="flex items-center space-x-2">
-            <ScaleIcon className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
-              FriendlyDispute
-            </span>
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="flex items-center space-x-6">
+    <div className="sticky top-0 z-50 w-full">
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-b border-black/[0.06]"></div>
+      <div className="container relative flex h-16 items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="relative flex items-center">
+            <div className="absolute inset-0 bg-primary/10 rounded-lg blur"></div>
+            <ScaleIcon className="h-7 w-7 sm:h-8 sm:w-8 text-primary relative" />
+          </div>
+          <span className="font-semibold text-lg sm:text-xl">
+            FriendlyDispute
+          </span>
+        </Link>
+
+        <div className="flex items-center gap-4 sm:gap-6">
+          <nav className="hidden sm:flex items-center gap-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  item.current ? 'text-primary' : 'text-muted-foreground'
-                }`}
+                className={`nav-link ${item.current ? 'text-foreground after:scale-x-100' : ''}`}
               >
                 {item.name}
               </Link>
             ))}
           </nav>
+          
           {authenticated ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
+              <Menu as="div" className="relative sm:hidden">
+                <Menu.Button className="p-2 hover:bg-primary/5 rounded-lg transition-colors">
+                  <Bars3Icon className="h-5 w-5" />
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right glass-card rounded-lg py-1">
+                    {navigation.map((item) => (
+                      <Menu.Item key={item.name}>
+                        {({ active }) => (
+                          <Link
+                            href={item.href}
+                            className={`block px-4 py-2 text-sm ${
+                              active || item.current ? 'bg-primary/5 text-foreground' : 'text-muted-foreground'
+                            }`}
+                          >
+                            {item.name}
+                          </Link>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Items>
+                </Transition>
+              </Menu>
               <HoverCard>
-                <HoverCardTrigger>
-                  <Avatar>
-                    {user?.avatarUrl ? (
-                      <AvatarImage src={user.avatarUrl} />
-                    ) : (
-                      <AvatarFallback>
-                        {user?.email?.address?.[0]?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
+                <HoverCardTrigger asChild>
+                  <button className="relative group">
+                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9 ring-2 ring-black/[0.04] transition-shadow hover:ring-black/[0.08]">
+                      {user?.avatarUrl ? (
+                        <AvatarImage src={user.avatarUrl} />
+                      ) : (
+                        <AvatarFallback className="bg-primary/5 text-primary font-medium">
+                          {user?.email?.address?.[0]?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </button>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-60">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold">{user?.email?.address || 'User'}</h4>
-                      <p className="text-sm text-muted-foreground">
+                <HoverCardContent className="w-64 p-3">
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <h4 className="text-sm font-medium">{user?.email?.address || 'User'}</h4>
+                      <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+                        <div className="size-1.5 rounded-full bg-primary"></div>
                         Connected with Privy
-                      </p>
+                      </div>
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full h-9 text-sm hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20"
                       onClick={() => logout()}
                     >
                       Sign out
@@ -116,7 +148,11 @@ function Header() {
                 </HoverCardContent>
               </HoverCard>
             </div>
-          ) : null}
+          ) : (
+            <Button onClick={() => login()} className="signup-button">
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </div>
@@ -181,81 +217,108 @@ function DisputeForm({ user, setLoading }) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4">
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      <div className="feature-card">
+        <div className="flex flex-col sm:flex-row items-start gap-4 mb-8">
+          <div className="size-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">
             <SparklesIcon className="h-6 w-6 text-primary" />
-            Create New Dispute
-          </CardTitle>
-          <CardDescription>
-            Enter the dispute details and deposit amount. The other party will need to match your deposit.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold">Create New Dispute</h2>
+            <p className="text-muted-foreground mt-1">
+              Enter the dispute details and deposit amount. The other party will need to match your deposit.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-8">
           {!privyUser?.wallet ? (
-            <div className="rounded-lg bg-muted p-4 text-sm">
-              <p className="text-muted-foreground">
-                Waiting for wallet to be ready...
-                {authenticated && <span className="block mt-1">Authenticated but wallet not ready yet</span>}
-              </p>
+            <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+              <div className="flex items-center gap-3">
+                <div className="size-2 rounded-full bg-primary animate-pulse"></div>
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-medium">Waiting for wallet...</span>
+                  {authenticated && <span className="block mt-0.5 text-xs">Authenticated but wallet not ready yet</span>}
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
-              <p className="text-muted-foreground flex items-center gap-2">
-                <ShieldCheckIcon className="h-4 w-4 text-green-500" />
-                Wallet connected: {privyUser.wallet.address}
-              </p>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <ScaleIcon className="h-4 w-4 text-primary" />
-                Contract: {DISPUTE_ESCROW_ADDRESS}
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <div className="flex items-center gap-3">
+                  <ShieldCheckIcon className="h-5 w-5 text-green-500" />
+                  <div>
+                    <p className="text-sm font-medium">Wallet Connected</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-mono">{privyUser.wallet.address}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl bg-primary/5 p-4 border border-primary/10">
+                <div className="flex items-center gap-3">
+                  <ScaleIcon className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Smart Contract</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 font-mono">{DISPUTE_ESCROW_ADDRESS}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Deposit Amount (ETH)
-              </label>
-              <Input
-                type="number"
-                step="0.01"
-                placeholder="0.1"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-              <p className="text-sm text-muted-foreground">
-                This amount will be held in escrow until the dispute is resolved
-              </p>
+          
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Deposit Amount</label>
+                  <div className="rounded-full bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">ETH</div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Amount held in escrow
+                </p>
+              </div>
+              <div className="relative">
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.1"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  className="h-12 pl-12 text-lg font-medium bg-transparent border-black/[0.06] focus:border-primary/20 focus:ring-primary/10"
+                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">Ξ</div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Case Description
-              </label>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Case Description</label>
+                  <div className="rounded-full bg-primary/5 px-2 py-0.5 text-xs font-medium text-primary">Required</div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Be clear and factual
+                </p>
+              </div>
               <Textarea
                 placeholder="Describe your side of the dispute..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
-                className="min-h-[100px]"
+                className="min-h-[120px] text-base resize-none bg-transparent border-black/[0.06] focus:border-primary/20 focus:ring-primary/10"
               />
-              <p className="text-sm text-muted-foreground">
-                Provide clear and factual information about your case
-              </p>
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="signup-button w-full h-12 text-base font-medium"
               disabled={!privyUser?.wallet}
             >
               Create Dispute
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
@@ -461,9 +524,8 @@ function DisputesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       <div className="container mx-auto py-12 px-4">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Your Disputes</h1>
             <p className="text-muted-foreground mt-2">
@@ -623,72 +685,87 @@ function ClientPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background overflow-hidden">
       <Header />
       <Toaster />
       
       {isDisputesPage ? (
         <DisputesPage />
       ) : (
-        <div className="container mx-auto py-12 px-4">
+        <div className="container relative mx-auto py-16 sm:py-24 px-4 sm:px-6">
           {!authenticated ? (
-            <div className="max-w-3xl mx-auto text-center space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <div className="max-w-[1200px] mx-auto">
+              <div className="absolute top-0 right-0 w-[600px] sm:w-[800px] h-[600px] sm:h-[800px] hero-glow"></div>
+              <div className="absolute bottom-0 left-0 w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] hero-glow"></div>
+              
+              <div className="relative text-center space-y-6 mb-12 sm:mb-16">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-sm text-primary mb-6 sm:mb-8">
+                  <SparklesIcon className="h-4 w-4" />
+                  <span className="font-medium">AI-Powered Dispute Resolution</span>
+                </div>
+                
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tight">
                   <span className="block">Resolve Disputes</span>
-                  <span className="block bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                  <span className="block mt-4 bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
                     With AI Arbitration
                   </span>
                 </h1>
-                <p className="mt-3 text-xl text-muted-foreground max-w-2xl mx-auto">
+                
+                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                   {disputeId ? 
                     "You've been invited to participate in a dispute resolution. Login to join." :
                     "Create a case, deposit funds, and let AI make a fair decision. Fast, unbiased, and transparent."}
                 </p>
               </div>
-              <div className="flex justify-center gap-4">
+
+              <div className="flex flex-col items-center gap-6 mb-24">
                 <Button
-                  size="lg"
                   onClick={() => login()}
-                  className="text-lg px-8"
+                  className="signup-button h-12 px-8 text-lg"
                 >
                   {disputeId ? "Join Dispute" : "Get Started"}
                 </Button>
+                <p className="text-sm text-muted-foreground">
+                  No credit card required · Free plan available
+                </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <SparklesIcon className="h-5 w-5 text-primary" />
-                      AI-Powered
-                    </CardTitle>
-                    <CardDescription>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="feature-card">
+                  <div className="mb-6">
+                    <div className="size-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-2">
+                      <SparklesIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold">AI-Powered</h3>
+                    <p className="mt-2 text-muted-foreground">
                       Advanced AI technology ensures fair and unbiased dispute resolution
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ScaleIcon className="h-5 w-5 text-primary" />
-                      Transparent
-                    </CardTitle>
-                    <CardDescription>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="feature-card">
+                  <div className="mb-6">
+                    <div className="size-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-2">
+                      <ScaleIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold">Transparent</h3>
+                    <p className="mt-2 text-muted-foreground">
                       All decisions are recorded on the blockchain for complete transparency
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ShieldCheckIcon className="h-5 w-5 text-primary" />
-                      Secure
-                    </CardTitle>
-                    <CardDescription>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="feature-card">
+                  <div className="mb-6">
+                    <div className="size-12 rounded-2xl bg-primary/5 flex items-center justify-center mb-2">
+                      <ShieldCheckIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold">Secure</h3>
+                    <p className="mt-2 text-muted-foreground">
                       Your funds are safely held in escrow until the dispute is resolved
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
