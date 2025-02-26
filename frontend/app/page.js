@@ -9,12 +9,20 @@ import { WagmiProvider, createConfig } from "wagmi";
 import { mainnet, sepolia, hardhat } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Menu, Transition } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { UserCircleIcon } from '@heroicons/react/24/solid';
+import { UserCircleIcon, SparklesIcon, ScaleIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { DISPUTE_ESCROW_ADDRESS } from './config';
 import DisputeEscrowABI from './contracts/DisputeEscrow.json';
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 // Add local Hardhat network
 const hardhatChain = {
@@ -51,150 +59,67 @@ function Header() {
   ];
 
   return (
-    <Disclosure as="nav" className="bg-white shadow">
-      {({ open }) => (
-        <>
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between">
-              <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
-                  <Link href="/" className="text-xl font-bold text-indigo-600">
-                    FriendlyDispute
-                  </Link>
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={classNames(
-                        item.current
-                          ? 'border-indigo-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                        'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                {authenticated && (
-                  <Menu as="div" className="relative ml-3">
-                    <div>
-                      <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        <span className="sr-only">Open user menu</span>
-                        {user?.avatarUrl ? (
-                          <img
-                            className="h-8 w-8 rounded-full"
-                            src={user.avatarUrl}
-                            alt=""
-                          />
-                        ) : (
-                          <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                        )}
-                      </Menu.Button>
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center">
+        <div className="mr-4 flex">
+          <Link href="/" className="flex items-center space-x-2">
+            <ScaleIcon className="h-6 w-6 text-primary" />
+            <span className="font-bold text-xl bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+              FriendlyDispute
+            </span>
+          </Link>
+        </div>
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <nav className="flex items-center space-x-6">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  item.current ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+          {authenticated ? (
+            <div className="flex items-center space-x-4">
+              <HoverCard>
+                <HoverCardTrigger>
+                  <Avatar>
+                    {user?.avatarUrl ? (
+                      <AvatarImage src={user.avatarUrl} />
+                    ) : (
+                      <AvatarFallback>
+                        {user?.email?.address?.[0]?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-60">
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold">{user?.email?.address || 'User'}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Connected with Privy
+                      </p>
                     </div>
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-200"
-                      enterFrom="transform opacity-0 scale-95"
-                      enterTo="transform opacity-100 scale-100"
-                      leave="transition ease-in duration-75"
-                      leaveFrom="transform opacity-100 scale-100"
-                      leaveTo="transform opacity-0 scale-95"
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => logout()}
                     >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <Menu.Item>
-                          {({ active }) => (
-                            <div className="px-4 py-2 text-sm text-gray-700">
-                              {user?.email?.address || 'User'}
-                            </div>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              onClick={() => logout()}
-                              className={classNames(
-                                active ? 'bg-gray-100' : '',
-                                'block w-full px-4 py-2 text-sm text-gray-700 text-left'
-                              )}
-                            >
-                              Sign out
-                            </button>
-                          )}
-                        </Menu.Item>
-                      </Menu.Items>
-                    </Transition>
-                  </Menu>
-                )}
-              </div>
-              <div className="-mr-2 flex items-center sm:hidden">
-                <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-                  <span className="sr-only">Open main menu</span>
-                  {open ? (
-                    <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </Disclosure.Button>
-              </div>
-            </div>
-          </div>
-
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 pb-3 pt-2">
-              {navigation.map((item) => (
-                <Disclosure.Button
-                  key={item.name}
-                  as={Link}
-                  href={item.href}
-                  className={classNames(
-                    item.current
-                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800',
-                    'block pl-3 pr-4 py-2 border-l-4 text-base font-medium'
-                  )}
-                >
-                  {item.name}
-                </Disclosure.Button>
-              ))}
-            </div>
-            {authenticated && (
-              <div className="border-t border-gray-200 pb-3 pt-4">
-                <div className="flex items-center px-4">
-                  {user?.avatarUrl ? (
-                    <img
-                      className="h-10 w-10 rounded-full"
-                      src={user.avatarUrl}
-                      alt=""
-                    />
-                  ) : (
-                    <UserCircleIcon className="h-10 w-10 text-gray-400" />
-                  )}
-                  <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">
-                      {user?.email?.address || 'User'}
-                    </div>
+                      Sign out
+                    </Button>
                   </div>
-                </div>
-                <div className="mt-3 space-y-1">
-                  <Disclosure.Button
-                    as="button"
-                    onClick={() => logout()}
-                    className="block w-full px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    Sign out
-                  </Disclosure.Button>
-                </div>
-              </div>
-            )}
-          </Disclosure.Panel>
-        </>
-      )}
-    </Disclosure>
+                </HoverCardContent>
+              </HoverCard>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -216,19 +141,6 @@ function DisputeForm({ user, setLoading }) {
     }
   }, [privyUser]);
 
-  useEffect(() => {
-    console.log('Connected wagmi address:', connectedAddress);
-  }, [connectedAddress]);
-
-  useEffect(() => {
-    console.log('Contract address:', DISPUTE_ESCROW_ADDRESS);
-  }, []);
-  
-  const { writeContract, data: hash, error: writeError } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -236,26 +148,12 @@ function DisputeForm({ user, setLoading }) {
 
     try {
       if (!authenticated || !privyUser?.wallet) {
-        setError('Please login first');
+        toast.error('Please login first');
         setLoading(false);
         return;
       }
 
-      console.log('Attempting to create dispute with:', {
-        address: DISPUTE_ESCROW_ADDRESS,
-        value: amount,
-        description,
-        wallet: privyUser.wallet.address,
-      });
-
       const value = parseEther(amount);
-
-      // Encode the function call
-      const createDisputeFunction = DisputeEscrowABI.find(x => x.name === 'createDispute' && x.type === 'function');
-      if (!createDisputeFunction) {
-        throw new Error('Create dispute function not found in ABI');
-      }
-
       const data = encodeFunctionData({
         abi: DisputeEscrowABI,
         functionName: 'createDispute',
@@ -268,114 +166,96 @@ function DisputeForm({ user, setLoading }) {
         data,
       });
 
+      toast.success('Transaction sent! Creating your dispute...');
       console.log('Transaction sent:', tx);
       setLoading(false);
     } catch (error) {
       console.error('Error creating dispute:', error);
-      setError(error.message || 'Failed to create dispute');
+      toast.error(error.message || 'Failed to create dispute');
       setLoading(false);
     }
   };
 
-  if (isSuccess) {
-    router.push('/disputes');
-  }
-
-  if (writeError) {
-    console.error('Contract write error:', writeError);
-  }
-
   if (!ready) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center p-8">Loading...</div>;
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white shadow sm:rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">
+    <div className="max-w-2xl mx-auto px-4">
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SparklesIcon className="h-6 w-6 text-primary" />
             Create New Dispute
-          </h3>
-          <div className="mt-2 max-w-xl text-sm text-gray-500">
-            <p>
-              Enter the dispute details and deposit amount. The other party will
-              need to match your deposit.
-            </p>
-          </div>
+          </CardTitle>
+          <CardDescription>
+            Enter the dispute details and deposit amount. The other party will need to match your deposit.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           {!privyUser?.wallet ? (
-            <div className="mt-4 text-sm text-yellow-600">
-              Waiting for wallet to be ready...
-              {authenticated && <p>Authenticated but wallet not ready yet</p>}
+            <div className="rounded-lg bg-muted p-4 text-sm">
+              <p className="text-muted-foreground">
+                Waiting for wallet to be ready...
+                {authenticated && <span className="block mt-1">Authenticated but wallet not ready yet</span>}
+              </p>
             </div>
           ) : (
-            <div className="mt-4 text-sm text-green-600">
-              <p>Wallet connected: {privyUser.wallet.address}</p>
-              <p>Contract address: {DISPUTE_ESCROW_ADDRESS}</p>
+            <div className="rounded-lg bg-muted p-4 text-sm space-y-2">
+              <p className="text-muted-foreground flex items-center gap-2">
+                <ShieldCheckIcon className="h-4 w-4 text-green-500" />
+                Wallet connected: {privyUser.wallet.address}
+              </p>
+              <p className="text-muted-foreground flex items-center gap-2">
+                <ScaleIcon className="h-4 w-4 text-primary" />
+                Contract: {DISPUTE_ESCROW_ADDRESS}
+              </p>
             </div>
           )}
-          {error && (
-            <div className="mt-2 text-sm text-red-600">
-              {error}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="mt-5 space-y-6">
-            <div>
-              <label
-                htmlFor="amount"
-                className="block text-sm font-medium text-gray-700"
-              >
+          <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Deposit Amount (ETH)
               </label>
-              <div className="mt-1">
-                <input
-                  type="number"
-                  step="0.01"
-                  name="amount"
-                  id="amount"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="0.1"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                />
-              </div>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0.1"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+              <p className="text-sm text-muted-foreground">
+                This amount will be held in escrow until the dispute is resolved
+              </p>
             </div>
 
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700"
-              >
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Case Description
               </label>
-              <div className="mt-1">
-                <textarea
-                  id="description"
-                  name="description"
-                  rows={4}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Describe your side of the dispute..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                />
-              </div>
+              <Textarea
+                placeholder="Describe your side of the dispute..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+                className="min-h-[100px]"
+              />
+              <p className="text-sm text-muted-foreground">
+                Provide clear and factual information about your case
+              </p>
             </div>
 
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={isConfirming || !privyUser?.wallet}
-                className={`inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                  (isConfirming || !privyUser?.wallet) ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {isConfirming ? 'Creating...' : 'Create Dispute'}
-              </button>
-            </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!privyUser?.wallet}
+            >
+              Create Dispute
+            </Button>
           </form>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -384,7 +264,6 @@ function DisputesPage() {
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [shareLink, setShareLink] = useState(null);
   const { ready, authenticated, user: privyUser, sendTransaction } = usePrivy();
   const searchParams = useSearchParams();
   const joinDisputeId = searchParams.get('join');
@@ -396,7 +275,7 @@ function DisputesPage() {
 
   const handleJoinDispute = async (disputeId, amount) => {
     if (!authenticated || !privyUser?.wallet) {
-      setError('Please login first');
+      toast.error('Please login first');
       return;
     }
 
@@ -413,18 +292,19 @@ function DisputesPage() {
         data,
       });
 
+      toast.success('Joining dispute...');
       console.log('Join transaction sent:', tx);
       await tx.wait();
-      fetchDisputes(); // Refresh the disputes list
+      fetchDisputes();
     } catch (error) {
       console.error('Error joining dispute:', error);
-      setError(error.message || 'Failed to join dispute');
+      toast.error(error.message || 'Failed to join dispute');
     }
   };
 
   const handleSubmitCase = async (disputeId, caseData) => {
     if (!authenticated || !privyUser?.wallet) {
-      setError('Please login first');
+      toast.error('Please login first');
       return;
     }
 
@@ -440,25 +320,25 @@ function DisputesPage() {
         data,
       });
 
+      toast.success('Submitting your case...');
       console.log('Submit case transaction sent:', tx);
       await tx.wait();
-      fetchDisputes(); // Refresh the disputes list
+      fetchDisputes();
     } catch (error) {
       console.error('Error submitting case:', error);
-      setError(error.message || 'Failed to submit case');
+      toast.error(error.message || 'Failed to submit case');
     }
   };
 
   const handleShare = (disputeId) => {
     const link = `${window.location.origin}/?disputeId=${disputeId}`;
     navigator.clipboard.writeText(link);
-    setShareLink(link);
-    setTimeout(() => setShareLink(null), 3000);
+    toast.success('Link copied to clipboard!');
   };
 
   const handleResolveDispute = async (disputeId) => {
     if (!authenticated || !privyUser?.wallet) {
-      setError('Please login first');
+      toast.error('Please login first');
       return;
     }
 
@@ -474,12 +354,13 @@ function DisputesPage() {
         data,
       });
 
+      toast.success('Requesting resolution...');
       console.log('Resolution request sent:', tx);
       await tx.wait();
-      fetchDisputes(); // Refresh the disputes list
+      fetchDisputes();
     } catch (error) {
       console.error('Error requesting resolution:', error);
-      setError(error.message || 'Failed to request resolution');
+      toast.error(error.message || 'Failed to request resolution');
     }
   };
 
@@ -488,7 +369,6 @@ function DisputesPage() {
     setError(null);
 
     try {
-      // First try to read the contract to make sure it exists
       const result = await client.readContract({
         address: DISPUTE_ESCROW_ADDRESS,
         abi: DisputeEscrowABI,
@@ -504,7 +384,6 @@ function DisputesPage() {
         return;
       }
 
-      // Fetch all disputes
       const disputePromises = Array.from({ length: nextDisputeId }, (_, i) =>
         client.readContract({
           address: DISPUTE_ESCROW_ADDRESS,
@@ -515,9 +394,6 @@ function DisputesPage() {
       );
 
       const disputesData = await Promise.all(disputePromises);
-      console.log('Raw disputes data:', disputesData);
-
-      // Transform the data into a more manageable format
       const formattedDisputes = disputesData.map((dispute, index) => ({
         id: index,
         partyA: dispute[0],
@@ -532,7 +408,6 @@ function DisputesPage() {
         requestId: dispute[9],
       }));
 
-      console.log('Formatted disputes:', formattedDisputes);
       setDisputes(formattedDisputes);
     } catch (error) {
       console.error('Error fetching disputes:', error);
@@ -556,187 +431,167 @@ function DisputesPage() {
   }, [joinDisputeId, authenticated, privyUser, disputes]);
 
   if (!ready || loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="animate-pulse text-primary">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Please login to view your disputes
-            </p>
-          </div>
+        <div className="container mx-auto py-12 px-4">
+          <Card className="max-w-lg mx-auto">
+            <CardHeader>
+              <CardTitle>Authentication Required</CardTitle>
+              <CardDescription>
+                Please login to view and manage your disputes
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
-      {shareLink && (
-        <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          <p className="text-sm">Link copied to clipboard!</p>
-        </div>
-      )}
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="sm:flex sm:items-center">
-          <div className="sm:flex-auto">
-            <h1 className="text-xl font-semibold text-gray-900">Your Disputes</h1>
-            <p className="mt-2 text-sm text-gray-700">
-              A list of all disputes you're involved in as either Party A or Party B.
+      <div className="container mx-auto py-12 px-4">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Your Disputes</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage and track all your active and resolved disputes
             </p>
           </div>
         </div>
-        {error && (
-          <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error</h3>
-                <div className="mt-2 text-sm text-red-700">{error}</div>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="mt-8 flex flex-col">
-          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        ID
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Amount (ETH)
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Status
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Your Role
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Cases
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {disputes.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="px-3 py-4 text-sm text-gray-500 text-center">
-                          No disputes found. Create a new dispute to get started!
-                        </td>
-                      </tr>
-                    ) : (
-                      disputes.map((dispute) => {
-                        const userAddress = privyUser?.wallet?.address?.toLowerCase();
-                        const isPartyA = dispute.partyA?.toLowerCase() === userAddress;
-                        const isPartyB = dispute.partyB?.toLowerCase() === userAddress;
-                        const role = isPartyA ? 'Party A' : isPartyB ? 'Party B' : 'None';
-                        const status = dispute.isResolved ? 'Resolved' : 
-                                     dispute.partyB === '0x0000000000000000000000000000000000000000' ? 'Waiting for Party B' : 
-                                     'Active';
-                        const bothCasesSubmitted = dispute.caseDataA && dispute.caseDataB;
 
-                        return (
-                          <tr key={dispute.id}>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {dispute.id}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {(Number(dispute.amount) / 1e18).toFixed(4)}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                                status === 'Resolved' ? 'bg-green-100 text-green-800' :
-                                status === 'Active' ? 'bg-blue-100 text-blue-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {status}
+        {error && (
+          <Card className="mb-8 border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Error</CardTitle>
+              <CardDescription>{error}</CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+
+        <div className="space-y-6">
+          {disputes.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No Disputes Found</CardTitle>
+                <CardDescription>
+                  Create a new dispute to get started with the resolution process
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          ) : (
+            disputes.map((dispute) => {
+              const userAddress = privyUser?.wallet?.address?.toLowerCase();
+              const isPartyA = dispute.partyA?.toLowerCase() === userAddress;
+              const isPartyB = dispute.partyB?.toLowerCase() === userAddress;
+              const role = isPartyA ? 'Party A' : isPartyB ? 'Party B' : 'None';
+              const status = dispute.isResolved ? 'Resolved' : 
+                           dispute.partyB === '0x0000000000000000000000000000000000000000' ? 'Waiting for Party B' : 
+                           'Active';
+              const bothCasesSubmitted = dispute.caseDataA && dispute.caseDataB;
+
+              return (
+                <Card key={dispute.id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>Dispute #{dispute.id}</span>
+                      <span className={`text-sm px-3 py-1 rounded-full ${
+                        status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                        status === 'Active' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {status}
+                      </span>
+                    </CardTitle>
+                    <CardDescription>
+                      Amount: {(Number(dispute.amount) / 1e18).toFixed(4)} ETH
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium mb-2">Party A's Case</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {dispute.caseDataA || 'Not submitted yet'}
+                          </p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-2">Party B's Case</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {dispute.caseDataB || 'Not submitted yet'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-end space-x-2">
+                    {!dispute.isResolved && (
+                      <>
+                        {role === 'None' ? (
+                          <Button
+                            onClick={() => handleJoinDispute(dispute.id, dispute.amount)}
+                            variant="default"
+                          >
+                            Join Dispute
+                          </Button>
+                        ) : (
+                          <>
+                            {status === 'Waiting for Party B' && isPartyA && (
+                              <Button
+                                variant="outline"
+                                onClick={() => handleShare(dispute.id)}
+                              >
+                                Share Link
+                              </Button>
+                            )}
+                            {(!dispute.caseDataA && isPartyA) || (!dispute.caseDataB && isPartyB) ? (
+                              <Button
+                                variant="default"
+                                onClick={() => handleSubmitCase(dispute.id, 'Sample case data')}
+                              >
+                                Submit Case
+                              </Button>
+                            ) : null}
+                            {bothCasesSubmitted && isPartyA && !dispute.requestId && (
+                              <Button
+                                variant="default"
+                                onClick={() => handleResolveDispute(dispute.id)}
+                              >
+                                Request Resolution
+                              </Button>
+                            )}
+                            {dispute.requestId && !dispute.isResolved && (
+                              <span className="text-yellow-600 text-sm">
+                                Resolution in progress...
                               </span>
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {role}
-                            </td>
-                            <td className="px-3 py-4 text-sm text-gray-500">
-                              {dispute.caseDataA && <div>Party A: {dispute.caseDataA}</div>}
-                              {dispute.caseDataB && <div>Party B: {dispute.caseDataB}</div>}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              <div className="space-x-2">
-                                {!dispute.isResolved && (
-                                  <>
-                                    {role === 'None' ? (
-                                      <button
-                                        className="text-indigo-600 hover:text-indigo-900"
-                                        onClick={() => handleJoinDispute(dispute.id, dispute.amount)}
-                                      >
-                                        Join Dispute
-                                      </button>
-                                    ) : (
-                                      <>
-                                        {status === 'Waiting for Party B' && isPartyA && (
-                                          <button
-                                            className="text-indigo-600 hover:text-indigo-900"
-                                            onClick={() => handleShare(dispute.id)}
-                                          >
-                                            Share Link
-                                          </button>
-                                        )}
-                                        {(!dispute.caseDataA && isPartyA) || (!dispute.caseDataB && isPartyB) ? (
-                                          <button
-                                            className="text-indigo-600 hover:text-indigo-900"
-                                            onClick={() => handleSubmitCase(dispute.id, 'Sample case data')}
-                                          >
-                                            Submit Case
-                                          </button>
-                                        ) : null}
-                                        {bothCasesSubmitted && isPartyA && !dispute.requestId && (
-                                          <button
-                                            className="text-green-600 hover:text-green-900"
-                                            onClick={() => handleResolveDispute(dispute.id)}
-                                          >
-                                            Request Resolution
-                                          </button>
-                                        )}
-                                        {dispute.requestId && !dispute.isResolved && (
-                                          <span className="text-yellow-600">
-                                            Resolution in progress...
-                                          </span>
-                                        )}
-                                      </>
-                                    )}
-                                  </>
-                                )}
-                                {dispute.isResolved && (
-                                  <span className="text-green-600">
-                                    Winner: {dispute.winner === dispute.partyA ? 'Party A' : 'Party B'}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
+                            )}
+                          </>
+                        )}
+                      </>
                     )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+                    {dispute.isResolved && (
+                      <span className="text-green-600 text-sm">
+                        Winner: {dispute.winner === dispute.partyA ? 'Party A' : 'Party B'}
+                      </span>
+                    )}
+                  </CardFooter>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
@@ -758,37 +613,82 @@ function ClientPage() {
   }, [authenticated, disputeId]);
 
   if (!ready) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-pulse text-primary">Loading...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-background">
       <Header />
+      <Toaster />
       
       {isDisputesPage ? (
         <DisputesPage />
       ) : (
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto py-12 px-4">
           {!authenticated ? (
-            <div className="text-center">
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
-                <span className="block">Resolve Disputes</span>
-                <span className="block text-indigo-600">With AI Arbitration</span>
-              </h1>
-              <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-                {disputeId ? 
-                  "You've been invited to participate in a dispute resolution. Login to join." :
-                  "Create a case, deposit funds, and let AI make a fair decision. Fast, unbiased, and transparent."}
-              </p>
-              <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
-                <div className="rounded-md shadow">
-                  <button
-                    onClick={() => login()}
-                    className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10"
-                  >
-                    {disputeId ? "Join Dispute" : "Get Started"}
-                  </button>
-                </div>
+            <div className="max-w-3xl mx-auto text-center space-y-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+                  <span className="block">Resolve Disputes</span>
+                  <span className="block bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
+                    With AI Arbitration
+                  </span>
+                </h1>
+                <p className="mt-3 text-xl text-muted-foreground max-w-2xl mx-auto">
+                  {disputeId ? 
+                    "You've been invited to participate in a dispute resolution. Login to join." :
+                    "Create a case, deposit funds, and let AI make a fair decision. Fast, unbiased, and transparent."}
+                </p>
+              </div>
+              <div className="flex justify-center gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => login()}
+                  className="text-lg px-8"
+                >
+                  {disputeId ? "Join Dispute" : "Get Started"}
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <SparklesIcon className="h-5 w-5 text-primary" />
+                      AI-Powered
+                    </CardTitle>
+                    <CardDescription>
+                      Advanced AI technology ensures fair and unbiased dispute resolution
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ScaleIcon className="h-5 w-5 text-primary" />
+                      Transparent
+                    </CardTitle>
+                    <CardDescription>
+                      All decisions are recorded on the blockchain for complete transparency
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShieldCheckIcon className="h-5 w-5 text-primary" />
+                      Secure
+                    </CardTitle>
+                    <CardDescription>
+                      Your funds are safely held in escrow until the dispute is resolved
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
               </div>
             </div>
           ) : (
